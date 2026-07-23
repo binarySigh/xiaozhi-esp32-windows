@@ -1,0 +1,234 @@
+menu "Xiaozhi Assistant"
+
+config OTA_URL
+    string "Default OTA URL"
+    default "http://192.168.3.56:8899"
+    help
+        The application will access this URL to check for new firmwares and server address.
+
+choice
+    prompt "Flash Assets"
+    default FLASH_ASSETS_INTERNAL
+    help
+        Assets are stored in the flash partition and mounted as a spiffs filesystem.
+
+    config FLASH_ASSETS_INTERNAL
+        bool "Internal flash"
+        help
+            Assets are stored in the flash partition and mounted as a spiffs filesystem.
+
+    config FLASH_ASSETS_SDCARD
+        bool "SD card"
+        depends on ESP32S3_BOX_BOARD_SD_SUPPORT
+        help
+            Assets are stored in the SD card.
+
+    config FLASH_ASSETS_HEADLESS
+        bool "Headless (no display / no sound)"
+        help
+            No display, no sound, suitable for headless devices.
+endchoice
+
+config WAKE_WORD_DETECT
+    bool "Wake word detection"
+    default y
+    help
+        Enable wake word detection.
+
+config WAKE_WORD_ENGINE
+    string "Wake word engine"
+    default "snowboy" if WAKE_WORD_DETECT
+    help
+        Wake word engine to use.
+
+choice
+    prompt "Select display style"
+    default USE_DEFAULT_MESSAGE_STYLE
+    help
+        Select display style for Xiaozhi device
+
+    config USE_DEFAULT_MESSAGE_STYLE
+        bool "Enable default message style"
+
+    config USE_WECHAT_MESSAGE_STYLE
+        bool "Enable WeChat Message Style"
+
+    config USE_EMOTE_MESSAGE_STYLE
+        bool "Emote animation style"
+endchoice
+
+config USE_MULTILINE_CHAT_MESSAGE
+    bool "Use multiline chat message display (default mode only)"
+    depends on USE_DEFAULT_MESSAGE_STYLE
+    default n
+    help
+        When enabled, the chat message area in the default display mode shows
+        multiple wrapped lines that grow upward from the bottom of the screen,
+        with auto-adaptive height.
+        When disabled (default), a single-line horizontally scrolling label
+        is shown at the bottom of the screen.
+
+choice WAKE_WORD_TYPE
+    prompt "Wake Word Implementation Type"
+    default WAKE_WORD_TYPE_MULTI_MIC
+
+    config WAKE_WORD_TYPE_MULTI_MIC
+        bool "Multi Mic SR (esp-sr)"
+        help
+            Uses esp-sr library for multi-mic wake word detection.
+
+    config WAKE_WORD_TYPE_SINGLE_MIC
+        bool "Single Mic SR (esp-sr)"
+        help
+            Uses esp-sr library for single-mic wake word detection.
+
+    config WAKE_WORD_TYPE_SPEEX
+        bool "Speex (noise reduction only)"
+        help
+            Uses speex library for noise reduction only.
+endchoice
+
+config WAKE_WORD_DETECT_BACKEND
+    string "Wake word detection backend"
+    default "multinet" if WAKE_WORD_TYPE_MULTI_MIC
+    default "multinet" if WAKE_WORD_TYPE_SINGLE_MIC
+    default ""
+    help
+        The wake word detection backend to use.
+
+config RESPEAKER_2MIC_SEL
+    bool "2 Mic Selection"
+    depends on WAKE_WORD_TYPE_MULTI_MIC
+    default y
+    help
+        Select the mic for the board.
+
+choice RESPEAKER_2MIC_VERSION
+    prompt "2 Mic Version"
+    depends on RESPEAKER_2MIC_SEL
+    default RESPEAKER_2MIC_V2
+
+    config RESPEAKER_2MIC_V2
+        bool "v2.0"
+    config RESPEAKER_2MIC_V1
+        bool "v1.0"
+endchoice
+
+config AUDIO_INPUT_SAMPLE_RATE
+    int "Audio input sample rate (Hz)"
+    default 16000
+
+config AUDIO_OUTPUT_SAMPLE_RATE
+    int "Audio output sample rate (Hz)"
+    default 48000
+
+config AUDIO_INPUT_REFERENCE
+    bool "Audio input reference"
+    default n
+
+config AUDIO_INPUT_REFERENCE_GAIN
+    int "Audio input reference gain (dB)"
+    default 0
+    depends on AUDIO_INPUT_REFERENCE
+
+config AUDIO_CODEC_DUPLEX_MODE
+    bool "Enable audio codec duplex mode"
+    default n
+    depends on ESP_SR_USE_AEC
+
+config PLAY_WELCOME_GUIDE
+    bool "Play welcome guide"
+    default y
+
+config DISABLE_LED
+    bool "Disable led"
+    default n
+
+config OTA_USE_HTTPS
+    bool "Use HTTPS for OTA"
+    default y
+
+config OTA_FIRMWARE_UPGRADE
+    bool "Firmware upgrade support"
+    default y
+
+config OTA_FIRMWARE_UPGRADE_BIN_FORMAT
+    string "Firmware upgrade bin format"
+    default "factory"
+    depends on OTA_FIRMWARE_UPGRADE
+
+config OTA_BIN_FILE
+    string "OTA bin file"
+    default "ota.bin"
+    depends on OTA_FIRMWARE_UPGRADE
+
+config BLE_BLUFI_ENABLE
+    bool "Enable BLE BluFi"
+    default y
+
+config TCP_SPEECH_SERVER_PORT
+    int "TCP Speech Server Port"
+    default 9001
+
+config SERVER_CONFIG_FILE_NAME
+    string "Server config file name"
+    default "server_config.json"
+
+config DEVICE_CONFIG_FILE_NAME
+    string "Device config file name"
+    default "device_config.json"
+
+config CONFIG_TOOLS_FILE_NAME
+    string "Config tools file name"
+    default "config_tools.json"
+
+config ENABLE_SYSTEM_INFO
+    bool "Enable system info"
+    default y
+
+config USE_PERFORMANCE_MONITOR
+    bool "Use performance monitor"
+    default n
+
+config ENABLE_SHELL
+    bool "Enable shell"
+    default n
+
+config SHELL_UART_PORT
+    int "Shell UART port"
+    default 0
+    depends on ENABLE_SHELL
+
+config SHELL_UART_BAUDRATE
+    int "Shell UART baudrate"
+    default 115200
+    depends on ENABLE_SHELL
+
+config LOG_OUTPUT_LEVEL
+    int "Log output level"
+    default 0
+
+config USE_MALLOC_TRACE
+    bool "Use malloc trace"
+    default n
+
+config MALLOC_TRACE_DUMP_INTERVAL
+    int "Malloc trace dump interval (seconds)"
+    default 60
+    depends on USE_MALLOC_TRACE
+
+config MALLOC_TRACE_DUMP_FILE_NAME
+    string "Malloc trace dump file name"
+    default "malloc_trace_dump.bin"
+    depends on USE_MALLOC_TRACE
+
+config ESP_SR_WN_ALEXA
+    bool "Alexa"
+    default n
+    depends on ESP_SR_WN_ALEXA_ACTIVE
+
+config ESP_SR_WN_ALEXA_ACTIVE
+    bool "Alexa (Active)"
+    default n
+
+endmenu
